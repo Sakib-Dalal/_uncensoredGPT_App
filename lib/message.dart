@@ -1,5 +1,5 @@
 class Message {
   bool isSender;
-  String msg;
+  dynamic msg;
   Message(this.isSender, this.msg);
 }
