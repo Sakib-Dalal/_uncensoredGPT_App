@@ -24,8 +24,17 @@ class MyApp extends StatelessWidget {
   }
 }
 
-class HomeScreen extends StatelessWidget {
+String mainUrl = "";
+
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
+
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  late TextEditingController url = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -55,6 +64,18 @@ class HomeScreen extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 50.0),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 48.0),
+              child: TextField(
+                controller: url,
+                keyboardType: TextInputType.text,
+                decoration: InputDecoration(
+                  border: OutlineInputBorder(),
+                  hintText: 'Enter App Code here',
+                ),
+              ),
+            ),
+            SizedBox(height: 50.0),
             FilledButton(
               style: ButtonStyle(
                 backgroundColor: MaterialStateProperty.all(Color(0xffFF0000)),
@@ -63,11 +84,23 @@ class HomeScreen extends StatelessWidget {
                 ),
               ),
               onPressed: () {
-                Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (context) => const ChatScreen(),
-                  ),
-                );
+                setState(() {
+                  mainUrl = url.text;
+                });
+                if (url.text.length > 8) {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (context) => const ChatScreen(),
+                    ),
+                  );
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      backgroundColor: Colors.red,
+                      content: Text("Please Enter Valid Code"),
+                    ),
+                  );
+                }
               },
               child: const Text(
                 'Start Chat',
@@ -96,7 +129,7 @@ class _ChatScreenState extends State<ChatScreen> {
 
   Future<void> sendMsg() async {
     String text = controller.text.trim();
-    String url = "https://7e56-34-74-68-96.ngrok-free.app/chat";
+    String url = "https://${mainUrl.toString()}.ngrok-free.app/chat";
     controller.clear();
 
     if (text.isEmpty) return;
@@ -124,8 +157,8 @@ class _ChatScreenState extends State<ChatScreen> {
             Message(
               false,
               MarkdownBody(
-                // data: json["message"]["content"].toString().trimLeft(),
-                data: json[0]["generated_text"].toString().trimLeft(),
+                data: json["message"]["content"].toString().trimLeft(),
+                // data: json[0]["generated_text"].toString().trimLeft(),
               ),
             ),
           );
